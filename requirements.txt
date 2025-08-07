@@ -1,0 +1,4 @@
+mysql-connector-python==8.2.0
+python-dotenv==1.0.0
+colorama==0.4.6
+tqdm==4.66.1

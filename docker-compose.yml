@@ -1,0 +1,61 @@
+version: '3.8'
+
+services:
+  migrator:
+    build: .
+    container_name: magiya_migrator
+    environment:
+      # Override these with your actual values
+      - V1_HOST=${V1_HOST:-mysql_v1}
+      - V1_PORT=${V1_PORT:-3306}
+      - V1_USER=${V1_USER:-root}
+      - V1_PASSWORD=${V1_PASSWORD:-password}
+      - V1_DATABASE=${V1_DATABASE:-magiya_v1}
+      - V2_HOST=${V2_HOST:-mysql_v2}
+      - V2_PORT=${V2_PORT:-3306}
+      - V2_USER=${V2_USER:-root}
+      - V2_PASSWORD=${V2_PASSWORD:-password}
+      - V2_DATABASE=${V2_DATABASE:-magiya_v2}
+    volumes:
+      - ./logs:/app/logs
+      - ./backup:/app/backup
+      - ./.env:/app/.env:ro
+    networks:
+      - migration_network
+    stdin_open: true
+    tty: true
+
+  # Optional: Local MySQL instances for testing
+  mysql_v1:
+    image: mysql:8.0
+    container_name: magiya_mysql_v1
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: magiya_v1
+    ports:
+      - "3306:3306"
+    networks:
+      - migration_network
+
+  mysql_v2:
+    image: mysql:8.0
+    container_name: magiya_mysql_v2
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: magiya_v2
+    ports:
+      - "3307:3306"
+    networks:
+      - migration_network
+
+  adminer:
+    image: adminer
+    container_name: magiya_adminer
+    ports:
+      - "8080:8080"
+    networks:
+      - migration_network
+
+networks:
+  migration_network:
+    driver: bridge
