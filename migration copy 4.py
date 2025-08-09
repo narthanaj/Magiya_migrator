@@ -471,21 +471,12 @@ class MagiyaMigration:
                 try:
                     address_data = json.loads(address_json)
                     part_order = ['address', 'city', 'zip', 'state', 'country']
-                    address_parts = []
-                    for key in part_order:
-                        value = address_data.get(key)
-                        if value is not None:
-                            # Convert to string, strip whitespace, and replace double quotes with single quotes
-                            value_str = str(value).strip().replace('"', "'")
-                            if value_str:
-                                address_parts.append(value_str)
+                    address_parts = [str(address_data.get(key)).strip() for key in part_order if address_data.get(key) is not None and str(address_data.get(key)).strip()]
                     if address_parts:
                         address_str = ','.join(address_parts)
                 except (json.JSONDecodeError, TypeError):
                     self.logger.warning(f"Could not parse address JSON for user record {record['id']}. Using raw value. Value: {address_json}")
-                    # If JSON parsing fails, use the raw value and replace double quotes
-                    if isinstance(address_json, str):
-                        address_str = address_json.replace('"', "'")
+                    address_str = address_json if isinstance(address_json, str) else None
 
             result = {
                 'operator_id': None,
